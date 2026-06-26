@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Asesmen Profil Siswa - SMAN 3 Bungo</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #ecfdf5; padding: 20px; color: #333; }
+        .card { max-width: 700px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        h1 { color: #047857; text-align: center; }
+        .hidden { display: none; }
+        .form-group { margin-bottom: 20px; }
+        label { font-weight: bold; display: block; margin-bottom: 8px; color: #333; }
+        input, textarea { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
+        button { background: #047857; color: white; border: none; padding: 15px; border-radius: 5px; cursor: pointer; width: 100%; font-size: 16px; margin-top: 10px; }
+        .friendly-msg { background: #d1fae5; padding: 15px; border-radius: 8px; margin-bottom: 20px; font-size: 14px; color: #065f46; border-left: 4px solid #047857; }
+
+        /* Tampilan Cetak */
+        #laporanCetak { display: none; }
+        @media print {
+            body { background: white; }
+            .no-print { display: none !important; }
+            #laporanCetak { display: block !important; font-size: 12px; line-height: 1.4; }
+            .aspect-box { border: 1px solid #000; padding: 15px; margin-bottom: 15px; page-break-inside: avoid; }
+            .aspect-title { background: #047857; color: white; font-weight: bold; padding: 8px; margin-bottom: 10px; text-transform: uppercase; }
+            .qa-pair { margin-bottom: 12px; }
+            .q-label { font-weight: bold; color: #047857; margin-bottom: 4px; }
+            .a-value { margin-left: 5px; font-style: italic; border-bottom: 1px dotted #ccc; padding-bottom: 5px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="card no-print" id="step1">
+    <h1>Identitas Siswa</h1>
+    <div class="form-group"><label>Nama Lengkap</label><input type="text" id="nama" required></div>
+    <div class="form-group"><label>Kelas</label><input type="text" id="kelas" required></div>
+    <div class="form-group"><label>Tempat, Tgl Lahir</label><input type="text" id="ttl" required></div>
+    <div class="form-group"><label>Usia</label><input type="number" id="usia" required></div>
+    <div class="form-group"><label>Tanggal Pengisian</label><input type="date" id="tglIsi" required></div>
+    <button onclick="nextStep()">Lanjut ke Pertanyaan &rarr;</button>
+</div>
+
+<form id="step2" class="card no-print hidden">
+    <h1>Daftar Pertanyaan</h1>
+    <div class="friendly-msg">
+        Halo! Silakan jawab pertanyaan di bawah ini dengan sejujur-jujurnya, ya. Tidak ada jawaban yang salah, curahkan saja apa yang kamu rasakan atau alami. Jawaban jujurmu akan sangat membantu Bapak/Ibu guru dalam memberikan dukungan terbaik agar proses belajarmu selama 3 tahun ke depan menjadi lebih menyenangkan dan tepat sasaran buat kamu.
+    </div>
+    <div id="pertanyaanList"></div>
+    <button type="submit">Selesai & Cetak Laporan</button>
+</form>
+
+<div id="laporanCetak">
+    <h2 style="text-align:center;">PROFIL ASESMEN AWAL SISWA</h2>
+    <div style="border: 1px solid #000; padding: 10px; margin-bottom: 20px;">
+        <strong>Nama:</strong> <span id="rNama"></span> | <strong>Kelas:</strong> <span id="rKelas"></span><br>
+        <strong>TTL:</strong> <span id="rTtl"></span> | <strong>Usia:</strong> <span id="rUsia"></span> | <strong>Tgl:</strong> <span id="rTgl"></span>
+    </div>
+    <div id="printContent"></div>
+</div>
+
+<script>
+    const data = [
+        {
+            a: "ASPEK PSIKOLOGIS & KEMATANGAN EMOSIONAL",
+            q: ["Ceritakan satu pengalaman di masa SMP saat kamu menghadapi kegagalan, nilai yang mengecewakan, atau situasi yang sangat sulit. Bagaimana perasaanmu saat itu, dan apa langkah konkret yang kamu lakukan untuk bangkit dari situasi tersebut?", "Apa yang biasanya membuatmu merasa sangat bersemangat untuk mempelajari sesuatu yang baru, dan sebaliknya, hal apa yang paling cepat membuatmu merasa bosan atau ingin menyerah saat belajar?", "Jika selama tiga tahun ke depan di SMAN 3 Bungo kamu diberi kebebasan dan dukungan penuh untuk membuat satu karya, acara, atau proyek besar—entah itu seperti pertunjukan Smaga Got Talent, proyek penelitian, atau kegiatan sosial—proyek seperti apa yang ingin kamu wujudkan, dan mengapa?"]
+        },
+        {
+            a: "ASPEK KOGNITIF & PROFIL BELAJAR",
+            q: ["Coba ingat kembali satu materi atau topik pelajaran di SMP yang paling cepat dan mudah kamu pahami. Menurutmu, mengapa saat itu kamu mudah memahaminya?", "Ceritakan secara jujur bagaimana kebiasaanmu dalam mengatur waktu antara mengerjakan tugas sekolah, bermain media sosial/game, dan beristirahat. Apakah kamu sudah merasa jadwalmu seimbang?", "Pelajaran atau aktivitas sekolah apa yang selama ini paling sering membuatmu merasa kesulitan atau tidak percaya diri? Dukungan atau cara mengajar seperti apa yang sangat kamu harapkan dari guru-guru di SMA nanti untuk membantumu memahami materi tersebut?"]
+        },
+        {
+            a: "ASPEK SOSIAL & DINAMIKA INTERPERSONAL",
+            q: ["Jika kamu ditugaskan dalam sebuah kelompok di mana anggota-anggotanya belum kamu kenal sama sekali, peran apa yang biasanya kamu ambil secara alami? Bagaimana caramu mulai memecahkan kecanggungan dan berkomunikasi dengan mereka?", "Pernahkah kamu berada dalam situasi di mana teman-temanmu mengajak melakukan sesuatu yang sebenarnya bertentangan dengan prinsipmu atau melanggar aturan sekolah? Bagaimana caramu merespons dan menolak ajakan tersebut saat itu?", "Ceritakan sebuah pengalaman saat kamu memiliki perbedaan pendapat yang cukup tajam atau konflik dengan teman dekatmu. Bagaimana caramu menghadapi perbedaan itu hingga akhirnya selesai?"]
+        },
+        {
+            a: "ASPEK LINGKUNGAN & EKOSISTEM KELUARGA",
+            q: ["Siapa orang di rumah atau di lingkungan sekitarmu yang paling sering dan paling nyaman kamu ajak bercerita mengenai keluh kesah atau kejadian di sekolah? Hal-hal seperti apa yang biasanya kalian diskusikan?", "Harapan atau target terbesar apa yang pernah disampaikan oleh orang tuamu terkait pendidikan dan masa depanmu? Bagaimana perasaanmu secara pribadi dalam memikul harapan tersebut?", "Tolong deskripsikan suasana di rumahmu ketika kamu sedang benar-benar perlu fokus belajar atau mengerjakan tugas yang sulit. Apakah suasananya sangat mendukung, atau adakah tantangan tertentu yang sering memecah konsentrasimu?"]
+        }
+    ];
+
+    let qIdx = 1;
+    data.forEach(sec => {
+        sec.q.forEach(quest => {
+            document.getElementById('pertanyaanList').innerHTML += `<div class="form-group"><label>${quest}</label><textarea name="q${qIdx++}" required></textarea></div>`;
+        });
+    });
+
+    function nextStep() {
+        if(!document.getElementById('nama').value) return alert("Lengkapi identitas!");
+        document.getElementById('step1').classList.add('hidden');
+        document.getElementById('step2').classList.remove('hidden');
+    }
+
+    document.getElementById('step2').onsubmit = function(e) {
+        e.preventDefault();
+        document.getElementById('rNama').innerText = document.getElementById('nama').value;
+        document.getElementById('rKelas').innerText = document.getElementById('kelas').value;
+        document.getElementById('rTtl').innerText = document.getElementById('ttl').value;
+        document.getElementById('rUsia').innerText = document.getElementById('usia').value;
+        document.getElementById('rTgl').innerText = document.getElementById('tglIsi').value;
+        
+        let c = 1;
+        let pContent = '';
+        data.forEach(sec => {
+            pContent += `<div class="aspect-box"><div class="aspect-title">${sec.a}</div>`;
+            sec.q.forEach(quest => {
+                pContent += `<div class="qa-pair"><div class="q-label">${quest}</div><div class="a-value">${document.getElementsByName('q'+c++)[0].value}</div></div>`;
+            });
+            pContent += `</div>`;
+        });
+        document.getElementById('printContent').innerHTML = pContent;
+        window.print();
+    }
+</script>
+</body>
+</html>
